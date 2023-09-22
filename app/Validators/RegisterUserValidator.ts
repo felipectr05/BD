@@ -1,8 +1,8 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema,rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class RegisterUserValidator {
-  constructor(protected ctx: HttpContextContract) {}
+  constructor(protected ctx: HttpContextContract) { }
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -23,7 +23,20 @@ export default class RegisterUserValidator {
    *     ])
    *    ```
    */
-  public schema = schema.create({})
+  public schema = schema.create({
+    name: schema.string({}, [
+      rules.required()
+    ]),
+    email: schema.string({}, [
+      rules.required(),
+      rules.email(),
+      rules.unique({ table: 'users', column: 'email' })
+    ]),
+    password: schema.string({}, [
+      rules.required(),
+      rules.minLength(4)
+    ])
+  })
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -36,5 +49,9 @@ export default class RegisterUserValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    required: "{{field}} é obrigatório para se registrar!!!",
+    'email.unique': "E-mail já cadastrado!!",
+    'minLength': "tamanho de senha inválido!"
+  }
 }
